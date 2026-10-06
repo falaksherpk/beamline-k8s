@@ -1,0 +1,7 @@
+# Calico API server (Chapter 13, LAB 13.6, option B): serves projectcalico.org/v3
+# and lets the operator's tiers controller finish (tigerastatus "tiers").
+apiVersion: operator.tigera.io/v1
+kind: APIServer
+metadata:
+  name: default
+spec: {}

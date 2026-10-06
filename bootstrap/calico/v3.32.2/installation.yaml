@@ -1,0 +1,21 @@
+# Calico v3.32.2 for the beamline lab cluster (Chapter 13, LAB 13.6).
+# VXLAN-only (bgp: Disabled): routes come from the Kubernetes datastore, so
+# no BGP peering and no TCP 179. Plain VXLAN, not VXLANCrossSubnet: all
+# nodes share 10.10.10.0/24, so CrossSubnet would never encapsulate.
+apiVersion: operator.tigera.io/v1
+kind: Installation
+metadata:
+  name: default
+spec:
+  calicoNetwork:
+    bgp: Disabled
+    ipPools:
+      - name: default-ipv4-ippool
+        cidr: 10.244.0.0/16
+        blockSize: 26
+        encapsulation: VXLAN
+        natOutgoing: Enabled
+        nodeSelector: all()
+    nodeAddressAutodetectionV4:
+      cidrs:
+        - 10.10.10.0/24
