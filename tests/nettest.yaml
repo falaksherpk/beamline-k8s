@@ -1,0 +1,47 @@
+# Throwaway cross-node network test (Chapter 13, LAB 13.7). Delete the namespace afterwards.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nettest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server
+  namespace: nettest
+  labels:
+    app: nettest-server
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: k8w2.beamline
+  containers:
+    - name: httpd
+      image: docker.io/library/busybox:1.37
+      command: ["sh", "-c", "echo \"hello from $(hostname)\" > /tmp/index.html && exec httpd -f -p 8080 -h /tmp"]
+      ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nettest-server
+  namespace: nettest
+spec:
+  selector:
+    app: nettest-server
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: nettest
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: k8w1.beamline
+  containers:
+    - name: client
+      image: docker.io/library/busybox:1.37
+      command: ["sleep", "3600"]

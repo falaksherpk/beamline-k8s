@@ -1,0 +1,15 @@
+# Throwaway: prove a pod can pull a private lab-registry image (Chapter 13, LAB 13.8).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pulltest
+  namespace: regtest
+spec:
+  restartPolicy: Never
+  imagePullSecrets:
+    - name: beamline-registry
+  containers:
+    - name: pulltest
+      image: gitlab.beamline:5050/beamline/podman-lab/beamline-test:v1
+      imagePullPolicy: Always
+      command: ["sh", "-c", "echo pulled-ok; cat /etc/alpine-release"]

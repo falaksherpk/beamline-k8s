@@ -1,0 +1,12 @@
+# Throwaway: deny all ingress to the nettest server pod (Chapter 13, LAB 13.7).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-server-ingress
+  namespace: nettest
+spec:
+  podSelector:
+    matchLabels:
+      app: nettest-server
+  policyTypes:
+    - Ingress
