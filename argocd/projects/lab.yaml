@@ -1,0 +1,23 @@
+# AppProject for the lab's first Argo CD applications (Chapter 14).
+# Fails closed: one source repo, one destination namespace, only the kinds
+# the demo app actually contains (+ Namespace, needed by CreateNamespace=true).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: lab
+  namespace: argocd
+spec:
+  description: Lab applications from beamline-k8s (Chapter 14)
+  sourceRepos:
+    - https://gitlab.beamline/beamline/beamline-k8s.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: beamline-demo
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service

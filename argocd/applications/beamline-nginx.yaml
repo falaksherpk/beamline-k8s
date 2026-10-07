@@ -1,0 +1,30 @@
+# Demo application for proving reconciliation in both directions (Chapter 14).
+# Argo CD creates beamline-demo with Pod Security "restricted" already set.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: beamline-nginx
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: lab
+  source:
+    repoURL: https://gitlab.beamline/beamline/beamline-k8s.git
+    targetRevision: main
+    path: apps/beamline-nginx
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: beamline-demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/enforce-version: v1.36
+        pod-security.kubernetes.io/warn: restricted
+        pod-security.kubernetes.io/audit: restricted

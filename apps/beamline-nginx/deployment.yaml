@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beamline-nginx
+  labels:
+    app.kubernetes.io/name: beamline-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: beamline-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: beamline-nginx
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          # nginx 1.30.5 (stable), UID 101, port 8080 — tag documents intent, digest pins bytes (checked 2026-10-07)
+          image: docker.io/nginxinc/nginx-unprivileged:1.30-alpine@sha256:15c994d10d6d78658721c3bcafff14cb281fba2a4bdf9d5ba92c416a472516e3
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
