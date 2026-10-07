@@ -1,0 +1,21 @@
+# Argo CD UI/API on one fixed NodePort (Chapter 14, decision B).
+# A separate Service, fully ours: switching upstream's argocd-server Service to
+# NodePort would expose both of its ports (80 and 443). Only 443 -> 8080 here.
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server-nodeport
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-server-nodeport
+    app.kubernetes.io/part-of: argocd
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: argocd-server
+  ports:
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8080
+      nodePort: 30443
