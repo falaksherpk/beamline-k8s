@@ -1,0 +1,25 @@
+# Root of the app-of-apps tree (Chapter 14): everything under argocd/ — projects
+# and applications, this file included. Argo CD's own install stays manual
+# (bootstrap/argocd/), like Calico.
+# Deliberately NO resources-finalizer: deleting root by mistake orphans its
+# children instead of cascading through every app and its workloads.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: https://gitlab.beamline/beamline/beamline-k8s.git
+    targetRevision: main
+    path: argocd
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
