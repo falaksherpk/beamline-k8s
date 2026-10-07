@@ -14,6 +14,7 @@ applied to the cluster itself.
 - `bootstrap/` — applied by hand, before anything can manage the cluster
   from Git (the pod network has to exist first).
   - `calico/v3.32.2/` — Calico CNI via the Tigera Operator.
+  - `argocd/v3.5.4/` — Argo CD, upstream non-HA `install.yaml` (unchanged).
 
 ## Calico v3.32.2 bootstrap (as run in Chapter 13)
 
