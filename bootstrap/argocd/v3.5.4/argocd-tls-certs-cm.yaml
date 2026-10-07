@@ -1,0 +1,45 @@
+# Lab CA for Argo CD's repo-server (Chapter 14).
+# Key = the host in the repository URL (https://gitlab.beamline/...); value = the CA
+# that signed gitlab.beamline's certificate, not the leaf, so a server-certificate
+# renewal doesn't break the repo connection. Public certificate only.
+# Applied server-side with --field-manager=beamline-lab, so only data."gitlab.beamline"
+# is ours; upstream install.yaml ships this ConfigMap with no data.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-tls-certs-cm
+  namespace: argocd
+data:
+  gitlab.beamline: |
+    -----BEGIN CERTIFICATE-----
+    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
+    Yg==
+    -----END CERTIFICATE-----
