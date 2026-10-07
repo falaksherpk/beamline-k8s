@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: beamline-nginx
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: beamline-nginx
