@@ -1,0 +1,31 @@
+# kube-state-metrics and the scraper identity for Prometheus on obs.beamline
+# (Chapter 16). Argo CD creates monitoring with Pod Security "restricted" set;
+# kube-state-metrics' security context meets it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-state-metrics
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: monitoring
+  source:
+    repoURL: https://gitlab.beamline/beamline/beamline-k8s.git
+    targetRevision: main
+    path: apps/kube-state-metrics
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: restricted
+        pod-security.kubernetes.io/enforce-version: v1.36
+        pod-security.kubernetes.io/warn: restricted
+        pod-security.kubernetes.io/audit: restricted

@@ -1,0 +1,71 @@
+# kube-state-metrics for Prometheus on obs.beamline (Chapter 16). Upstream v2.20.0
+# (examples/standard at commit 4ffeda2ef866b0fef372849825a803296483b336) is kept
+# unchanged under upstream/v2.20.0/ (see SOURCE there); this overlay changes only:
+#   - namespace monitoring (instead of kube-system)
+#   - the image pinned by digest (registry.k8s.io manifest list, 2026-10-09)
+#   - resource requests (upstream sets none)
+#   - no Secrets or ConfigMaps: removed from the ClusterRole and from --resources
+#   - the scraper identity for obs (scraper-rbac.yaml)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+
+resources:
+  - upstream/v2.20.0
+  - scraper-rbac.yaml
+
+images:
+  - name: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    digest: sha256:42cfe3723a5f058171c627537fb57a3ea0f26e4380fa18555a95cb1a1b4cfc5b
+
+patches:
+  # The binding's subject names kube-system explicitly; point it at monitoring
+  # ourselves instead of relying on the namespace transformer.
+  - target:
+      kind: ClusterRoleBinding
+      name: kube-state-metrics
+    patch: |-
+      - op: test
+        path: /subjects/0/name
+        value: kube-state-metrics
+      - op: replace
+        path: /subjects/0/namespace
+        value: monitoring
+  # No Secrets or ConfigMaps: a watch would hold every Secret in memory. The test
+  # operations make the build fail if upstream reorders the list.
+  - target:
+      kind: ClusterRole
+      name: kube-state-metrics
+    patch: |-
+      - op: test
+        path: /rules/0/resources/0
+        value: configmaps
+      - op: test
+        path: /rules/0/resources/1
+        value: secrets
+      - op: remove
+        path: /rules/0/resources/1
+      - op: remove
+        path: /rules/0/resources/0
+  # Collectors: v2.20.0's default --resources minus configmaps and secrets.
+  - target:
+      kind: Deployment
+      name: kube-state-metrics
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: kube-state-metrics
+      spec:
+        template:
+          spec:
+            containers:
+              - name: kube-state-metrics
+                args:
+                  - --resources=certificatesigningrequests,cronjobs,daemonsets,deployments,endpointslices,horizontalpodautoscalers,ingresses,jobs,leases,limitranges,mutatingadmissionpolicies,mutatingadmissionpolicybindings,mutatingwebhookconfigurations,namespaces,networkpolicies,nodes,persistentvolumeclaims,persistentvolumes,poddisruptionbudgets,pods,replicasets,replicationcontrollers,resourcequotas,services,statefulsets,storageclasses,validatingadmissionpolicies,validatingadmissionpolicybindings,validatingwebhookconfigurations,volumeattachments
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi

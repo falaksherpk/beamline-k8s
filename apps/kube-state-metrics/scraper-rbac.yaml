@@ -1,0 +1,58 @@
+# The identity Prometheus on obs.beamline scrapes with (Chapter 16). Its token
+# Secret is created by hand, not in Git, and copied to obs.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-obs
+  namespace: monitoring
+automountServiceAccountToken: false
+---
+# kubelet /metrics and /metrics/cadvisor on every node: the kubelet authorizes
+# those paths as nodes/metrics. Not nodes/proxy, which would allow far more.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-obs-kubelet-metrics
+rules:
+  - apiGroups: [""]
+    resources: [nodes/metrics]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-obs-kubelet-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-obs-kubelet-metrics
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-obs
+    namespace: monitoring
+---
+# kube-state-metrics through the apiserver's service proxy, and nothing else.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-obs-ksm
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: [services/proxy]
+    resourceNames: ["kube-state-metrics:http-metrics"]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-obs-ksm
+  namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-obs-ksm
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-obs
+    namespace: monitoring

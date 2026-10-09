@@ -1,0 +1,9 @@
+kube-state-metrics v2.20.0, examples/standard, unchanged.
+Repository: https://github.com/kubernetes/kube-state-metrics
+Tag v2.20.0 -> commit 4ffeda2ef866b0fef372849825a803296483b336 (lightweight tag)
+Fetched 2026-10-09 from raw.githubusercontent.com at that commit; each file's git
+blob hash matched the GitHub API's for that commit. SHA256SUMS lists the files.
+Image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0, manifest list
+sha256:42cfe3723a5f058171c627537fb57a3ea0f26e4380fa18555a95cb1a1b4cfc5b (single
+source: the registry; signature not verified). Pinned in ../../kustomization.yaml.
+Compatibility (README at the tag): v2.20.0 <-> client-go v1.36.

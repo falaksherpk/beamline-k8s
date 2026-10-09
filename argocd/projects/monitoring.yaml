@@ -1,0 +1,38 @@
+# AppProject for exporters scraped by Prometheus on obs.beamline (Chapter 16).
+# Fails closed: one source repo, one destination namespace, only the kinds that
+# kube-state-metrics and the scraper identity contain (+ Namespace, needed by
+# CreateNamespace=true). It may create ClusterRoles and ClusterRoleBindings, so
+# anything merged under apps/kube-state-metrics can grant cluster-wide rights.
+# Sync wave -1: root creates this project before the Application that uses it.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Exporters for Prometheus on obs.beamline, from beamline-k8s (Chapter 16)
+  sourceRepos:
+    - https://gitlab.beamline/beamline/beamline-k8s.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: monitoring
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: Service
+    - group: apps
+      kind: Deployment
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
